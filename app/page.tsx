@@ -2,11 +2,25 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
+import { QRCodeDisplay } from "@/components/qr-code"
+import { LinkHistory } from "@/components/link-history"
+import { useLinkHistory } from "@/hooks/use-link-history"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export default function Home() {
   const [url, setUrl] = useState("")
   const [shortUrl, setShortUrl] = useState("")
+  const [shortCode, setShortCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const { history, addToHistory, removeFromHistory, clearHistory } = useLinkHistory()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,6 +42,15 @@ export default function Home() {
       }
 
       setShortUrl(data.shortUrl)
+      setShortCode(data.shortCode)
+
+      // Add to history
+      addToHistory({
+        shortCode: data.shortCode,
+        shortUrl: data.shortUrl,
+        originalUrl: url,
+      })
+
       toast.success("URL shortened successfully!")
     } catch {
       toast.error("Something went wrong")
@@ -39,7 +62,9 @@ export default function Home() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shortUrl)
+      setCopied(true)
       toast.success("Copied to clipboard!")
+      setTimeout(() => setCopied(false), 2000)
     } catch {
       toast.error("Failed to copy")
     }
@@ -56,7 +81,7 @@ export default function Home() {
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-cyan-500/20 rounded-full blur-[100px]" />
 
       {/* Content */}
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-start pt-20 md:pt-32 px-4 pb-20">
         {/* Header */}
         <div className="mb-12 text-center">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-4">
@@ -110,21 +135,58 @@ export default function Home() {
             {shortUrl && (
               <div className="mt-8 pt-6 border-t border-white/10">
                 <p className="text-sm text-zinc-500 mb-3">Your shortened URL</p>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <div className="flex-1 h-12 px-4 rounded-xl bg-white/5 border border-white/10 flex items-center overflow-hidden">
                     <span className="text-cyan-400 font-mono text-sm truncate">
                       {shortUrl}
                     </span>
                   </div>
+
+                  {/* Copy button */}
                   <button
                     onClick={handleCopy}
-                    className="h-12 px-6 rounded-xl font-medium text-white bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300 flex items-center gap-2"
+                    className={`h-12 w-12 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shrink-0 ${
+                      copied
+                        ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                        : "text-zinc-400 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white"
+                    }`}
+                    title="Copy"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Copy
+                    {copied ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    )}
                   </button>
+
+                  {/* QR Code Dialog */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button
+                        className="h-12 w-12 rounded-xl text-zinc-400 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 flex items-center justify-center shrink-0"
+                        title="QR Code"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md bg-zinc-900 border-white/10">
+                      <DialogHeader>
+                        <DialogTitle className="text-white text-center">QR Code</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col items-center py-4">
+                        <QRCodeDisplay url={shortUrl} size={200} />
+                        <p className="mt-4 text-sm text-zinc-400 text-center break-all px-4">
+                          {shortUrl}
+                        </p>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             )}
@@ -145,8 +207,15 @@ export default function Home() {
           </div>
         </div>
 
+        {/* History */}
+        <LinkHistory
+          history={history}
+          onRemove={removeFromHistory}
+          onClear={clearHistory}
+        />
+
         {/* Footer */}
-        <div className="absolute bottom-8 text-zinc-600 text-sm">
+        <div className="mt-auto pt-12 text-zinc-600 text-sm">
           Built with Next.js & Tailwind CSS
         </div>
       </div>
