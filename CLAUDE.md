@@ -139,6 +139,107 @@ model User {
    - Avoid sequential or predictable codes
    - Check for collisions before saving
 
+## Design System
+
+### Theme
+- **Style**: Dark tech / Glassmorphism
+- **Base background**: `bg-zinc-950` with `bg-grid` overlay
+- **Accent gradient**: Blue → Cyan (`from-blue-500 to-cyan-500`)
+- **Mode**: Dark mode only (`<html className="dark">`)
+
+### Color Palette
+
+| Purpose | Colors |
+|---------|--------|
+| Background | `zinc-950`, `zinc-900` |
+| Text primary | `white` |
+| Text secondary | `zinc-400`, `zinc-500` |
+| Text muted | `zinc-600` |
+| Accent | `blue-500`, `cyan-500`, `teal-500` |
+| Success | `green-500` |
+| Error | `red-500` |
+| Borders | `white/10`, `white/5` |
+
+### Component Patterns
+
+**Cards (Glass effect)**
+```tsx
+<div className="glass rounded-2xl p-8 shadow-2xl">
+// glass = bg-white/5 backdrop-blur-xl border border-white/10
+```
+
+**Buttons (Primary)**
+```tsx
+<button className="h-14 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] active:scale-[0.98]">
+```
+
+**Buttons (Secondary)**
+```tsx
+<button className="h-12 px-6 rounded-xl font-medium text-white bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+```
+
+**Inputs**
+```tsx
+<input className="w-full h-14 px-5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300" />
+```
+
+**Gradient Text**
+```tsx
+<span className="text-gradient-brand">  // Blue → Cyan → Teal
+<span className="text-gradient">        // White → Zinc
+```
+
+### Layout Patterns
+
+**Full page centered**
+```tsx
+<div className="relative min-h-screen overflow-hidden bg-zinc-950">
+  <div className="absolute inset-0 bg-grid" />
+  <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
+    {/* content */}
+  </div>
+</div>
+```
+
+**Ambient glow effect**
+```tsx
+<div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[120px]" />
+```
+
+### Spacing & Sizing
+
+| Element | Size |
+|---------|------|
+| Card padding | `p-8` |
+| Card max-width | `max-w-xl` |
+| Page max-width | `max-w-6xl` |
+| Mobile padding | `px-4` |
+| Button height | `h-12`, `h-14` |
+| Input height | `h-14` |
+| Border radius | `rounded-xl` (12px), `rounded-2xl` (16px) |
+| Gap | `gap-3`, `gap-4`, `gap-8` |
+
+### Animation & Transitions
+
+- Default transition: `transition-all duration-300`
+- Button press: `active:scale-[0.98]`
+- Hover glow: `hover:shadow-[0_0_30px_rgba(59,130,246,0.4)]`
+- Loading spinner: `animate-spin`
+- Status indicator: `animate-pulse`
+
+### Custom CSS Classes (globals.css)
+
+| Class | Effect |
+|-------|--------|
+| `bg-grid` | Grid line background pattern |
+| `bg-dots` | Dot pattern background |
+| `glass` | Glassmorphism effect |
+| `text-gradient` | White to zinc gradient text |
+| `text-gradient-brand` | Blue to cyan gradient text |
+| `glow` | Multi-layer blue glow |
+| `glow-sm` | Subtle blue glow |
+| `animate-pulse-glow` | Pulsing glow animation |
+
 ## Development Guidelines
 
 ### URL Shortening Flow
