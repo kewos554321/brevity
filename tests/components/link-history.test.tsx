@@ -276,4 +276,45 @@ describe("LinkHistory", () => {
     // The short URL should not have "..."
     expect(screen.getByText("https://example2.com")).toBeInTheDocument()
   })
+
+  it("should render refresh button when onRefresh is provided", () => {
+    const mockOnRefresh = vi.fn()
+    render(
+      <LinkHistory
+        history={mockHistory}
+        onRemove={mockOnRemove}
+        onClear={mockOnClear}
+        onRefresh={mockOnRefresh}
+      />
+    )
+
+    expect(screen.getByText("Refresh")).toBeInTheDocument()
+  })
+
+  it("should call onRefresh when refresh button is clicked", () => {
+    const mockOnRefresh = vi.fn()
+    render(
+      <LinkHistory
+        history={mockHistory}
+        onRemove={mockOnRemove}
+        onClear={mockOnClear}
+        onRefresh={mockOnRefresh}
+      />
+    )
+
+    fireEvent.click(screen.getByText("Refresh"))
+    expect(mockOnRefresh).toHaveBeenCalled()
+  })
+
+  it("should not render refresh button when onRefresh is not provided", () => {
+    render(
+      <LinkHistory
+        history={mockHistory}
+        onRemove={mockOnRemove}
+        onClear={mockOnClear}
+      />
+    )
+
+    expect(screen.queryByText("Refresh")).not.toBeInTheDocument()
+  })
 })

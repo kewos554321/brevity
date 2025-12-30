@@ -11,10 +11,13 @@ const localStorageMock = {
 Object.defineProperty(window, "localStorage", { value: localStorageMock })
 
 // Mock clipboard API
-Object.assign(navigator, {
-  clipboard: {
-    writeText: vi.fn().mockResolvedValue(undefined),
-  },
+const clipboardMock = {
+  writeText: vi.fn().mockResolvedValue(undefined),
+}
+Object.defineProperty(navigator, "clipboard", {
+  value: clipboardMock,
+  writable: true,
+  configurable: true,
 })
 
 // Mock crypto.randomUUID
