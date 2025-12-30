@@ -20,5 +20,7 @@ export function isValidUrl(url: string): boolean {
 }
 
 export function getBaseUrl(): string {
-  return process.env.BASE_URL || "http://localhost:3000"
+  if (process.env.BASE_URL) return process.env.BASE_URL
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return "http://localhost:3000"
 }

@@ -67,8 +67,6 @@ describe("isValidUrl", () => {
 })
 
 describe("getBaseUrl", () => {
-  const originalEnv = process.env.BASE_URL
-
   beforeEach(() => {
     vi.unstubAllEnvs()
   })
@@ -78,8 +76,15 @@ describe("getBaseUrl", () => {
     expect(getBaseUrl()).toBe("https://example.com")
   })
 
+  it("should return VERCEL_URL with https prefix", () => {
+    vi.stubEnv("BASE_URL", "")
+    vi.stubEnv("VERCEL_URL", "my-app.vercel.app")
+    expect(getBaseUrl()).toBe("https://my-app.vercel.app")
+  })
+
   it("should return localhost as fallback", () => {
     vi.stubEnv("BASE_URL", "")
+    vi.stubEnv("VERCEL_URL", "")
     expect(getBaseUrl()).toBe("http://localhost:3000")
   })
 })
