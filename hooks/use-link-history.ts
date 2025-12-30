@@ -20,15 +20,42 @@ export function useLinkHistory() {
 
   // Load history from localStorage on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        setHistory(JSON.parse(stored))
+    const loadHistory = async () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored) {
+          // Ensure all items have clicks field (for backward compatibility)
+          const parsed = JSON.parse(stored)
+          const normalized = parsed.map((item: LinkHistoryItem) => ({
+            ...item,
+            clicks: item.clicks ?? 0,
+          }))
+          setHistory(normalized)
+
+          // Auto-refresh clicks from server
+          const updated = await Promise.all(
+            normalized.map(async (item: LinkHistoryItem) => {
+              try {
+                const res = await fetch(`/api/links/${item.shortCode}`, { cache: 'no-store' })
+                if (res.ok) {
+                  const data = await res.json()
+                  return { ...item, clicks: data.clicks }
+                }
+              } catch {
+                // Keep original on error
+              }
+              return item
+            })
+          )
+          setHistory(updated)
+        }
+      } catch (error) {
+        console.error("Failed to load history:", error)
       }
-    } catch (error) {
-      console.error("Failed to load history:", error)
+      setIsLoaded(true)
     }
-    setIsLoaded(true)
+
+    loadHistory()
   }, [])
 
   // Save history to localStorage whenever it changes
@@ -72,7 +99,9 @@ export function useLinkHistory() {
     const updated = await Promise.all(
       history.map(async (item) => {
         try {
-          const res = await fetch(`/api/links/${item.shortCode}`)
+          const res = await fetch(`/api/links/${item.shortCode}`, {
+            cache: 'no-store',
+          })
           if (res.ok) {
             const data = await res.json()
             return { ...item, clicks: data.clicks }
