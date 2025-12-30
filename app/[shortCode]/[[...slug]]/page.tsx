@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation"
 import { prisma } from "@/lib/db"
+import { RedirectClient } from "./redirect-client"
 
 export const dynamic = "force-dynamic"
 
@@ -22,6 +23,23 @@ export default async function RedirectPage({ params }: Props) {
   // Check if link has expired
   if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
     notFound()
+  }
+
+  // Check if max clicks reached (one-time link)
+  if (link.maxClicks && link.clicks >= link.maxClicks) {
+    notFound()
+  }
+
+  // If password required or preview enabled, show client component
+  if (link.password || link.showPreview) {
+    return (
+      <RedirectClient
+        shortCode={link.shortCode}
+        originalUrl={link.originalUrl}
+        hasPassword={!!link.password}
+        showPreview={link.showPreview}
+      />
+    )
   }
 
   // Increment click count

@@ -17,6 +17,9 @@ export default function Home() {
   const [url, setUrl] = useState("")
   const [description, setDescription] = useState("")
   const [ttl, setTtl] = useState<number | null>(1) // days, default 1 day
+  const [password, setPassword] = useState("")
+  const [oneTime, setOneTime] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   const [shortUrl, setShortUrl] = useState("")
   const [shortCode, setShortCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -43,7 +46,13 @@ export default function Home() {
       const response = await fetch("/api/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, ttl }),
+        body: JSON.stringify({
+          url,
+          ttl,
+          password: password || undefined,
+          oneTime,
+          showPreview,
+        }),
       })
 
       const data = await response.json()
@@ -61,7 +70,10 @@ export default function Home() {
 
       setShortUrl(finalUrl)
       setShortCode(data.shortCode)
-      setDescription("") // Reset description after success
+      setDescription("")
+      setPassword("")
+      setOneTime(false)
+      setShowPreview(false)
 
       // Add to history
       addToHistory({
@@ -191,6 +203,53 @@ export default function Home() {
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  {/* Password Protection */}
+                  <div>
+                    <label className="block text-sm text-zinc-400 mb-2">
+                      Password <span className="text-zinc-600">(optional)</span>
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Enter password to protect link"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full h-10 px-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-zinc-600 text-sm focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                    />
+                  </div>
+
+                  {/* Toggle Options */}
+                  <div className="space-y-3">
+                    {/* One-time Link */}
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={oneTime}
+                          onChange={(e) => setOneTime(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-10 h-6 bg-white/10 rounded-full peer-checked:bg-blue-600 transition-colors" />
+                        <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4" />
+                      </div>
+                      <span className="text-sm text-zinc-400 group-hover:text-zinc-300">One-time link (expires after 1 click)</span>
+                    </label>
+
+                    {/* Show Preview */}
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={showPreview}
+                          onChange={(e) => setShowPreview(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-10 h-6 bg-white/10 rounded-full peer-checked:bg-blue-600 transition-colors" />
+                        <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4" />
+                      </div>
+                      <span className="text-sm text-zinc-400 group-hover:text-zinc-300">Show preview before redirect</span>
+                    </label>
                   </div>
                 </div>
               )}

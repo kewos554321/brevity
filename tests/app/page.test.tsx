@@ -373,7 +373,7 @@ describe("Home Page", () => {
 
   it("should render footer", () => {
     render(<Home />)
-    expect(screen.getByText("Built with Next.js & Tailwind CSS")).toBeInTheDocument()
+    expect(screen.getByText("Built by Jay Wang")).toBeInTheDocument()
   })
 
   it("should show QR code button after successful submission", async () => {

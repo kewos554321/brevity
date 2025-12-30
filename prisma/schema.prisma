@@ -14,6 +14,9 @@ model Link {
   createdAt   DateTime  @default(now())
   expiresAt   DateTime?
   clicks      Int       @default(0)
+  password    String?   // Optional password protection (hashed)
+  maxClicks   Int?      // Optional max clicks (1 = one-time link)
+  showPreview Boolean   @default(false) // Show preview before redirect
 
   @@index([expiresAt]) // For cleanup queries
   @@index([originalUrl]) // For duplicate check (optional)

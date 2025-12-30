@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { url, ttl } = body // ttl in days (null = never expires)
+    const { url, ttl, password, oneTime, showPreview } = body
 
     if (!url) {
       return NextResponse.json(
@@ -67,12 +67,26 @@ export async function POST(request: NextRequest) {
     // Calculate expiration date
     const expiresAt = ttl ? new Date(Date.now() + ttl * 24 * 60 * 60 * 1000) : null
 
+    // Hash password if provided (simple hash for demo, use bcrypt in production)
+    let hashedPassword = null
+    if (password) {
+      const encoder = new TextEncoder()
+      const data = encoder.encode(password)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+      hashedPassword = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+    }
+
     // Create the link
     const link = await prisma.link.create({
       data: {
         shortCode,
         originalUrl: url,
         expiresAt,
+        password: hashedPassword,
+        maxClicks: oneTime ? 1 : null,
+        showPreview: showPreview ?? false,
       },
     })
 

@@ -28,7 +28,10 @@ describe("useLinkHistory", () => {
     )
 
     const { result } = renderHook(() => useLinkHistory())
-    expect(result.current.history).toEqual(storedHistory)
+    // History gets clicks: 0 added for backward compatibility
+    expect(result.current.history).toEqual([
+      { ...storedHistory[0], clicks: 0 }
+    ])
   })
 
   it("should handle corrupted localStorage data", () => {
