@@ -19,6 +19,7 @@ export function isValidUrl(url: string): boolean {
   }
 }
 
+
 export function getBaseUrl(): string {
   if (process.env.BASE_URL) return process.env.BASE_URL
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`

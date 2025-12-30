@@ -15,12 +15,24 @@ import {
 
 export default function Home() {
   const [url, setUrl] = useState("")
+  const [description, setDescription] = useState("")
+  const [ttl, setTtl] = useState<number | null>(1) // days, default 1 day
   const [shortUrl, setShortUrl] = useState("")
   const [shortCode, setShortCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
-  const { history, addToHistory, removeFromHistory, clearHistory } = useLinkHistory()
+  const ttlOptions = [
+    { value: null, label: "Never expires" },
+    { value: 1, label: "1 day" },
+    { value: 7, label: "7 days" },
+    { value: 30, label: "30 days" },
+    { value: 90, label: "90 days" },
+    { value: 365, label: "1 year" },
+  ]
+
+  const { history, addToHistory, removeFromHistory, clearHistory, refreshClicks } = useLinkHistory()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,7 +43,7 @@ export default function Home() {
       const response = await fetch("/api/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, ttl }),
       })
 
       const data = await response.json()
@@ -41,13 +53,20 @@ export default function Home() {
         return
       }
 
-      setShortUrl(data.shortUrl)
+      // Append description slug if provided
+      const slug = description.trim()
+        ? "/" + description.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+        : ""
+      const finalUrl = data.shortUrl + slug
+
+      setShortUrl(finalUrl)
       setShortCode(data.shortCode)
+      setDescription("") // Reset description after success
 
       // Add to history
       addToHistory({
         shortCode: data.shortCode,
-        shortUrl: data.shortUrl,
+        shortUrl: finalUrl,
         originalUrl: url,
       })
 
@@ -106,10 +125,75 @@ export default function Home() {
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   required
-                  className="w-full h-14 px-5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300"
+                  className="w-full h-14 px-5 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300"
                 />
+                {url && (
+                  <button
+                    type="button"
+                    onClick={() => setUrl("")}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 opacity-0 group-focus-within:opacity-100 -z-10 blur-xl transition-opacity duration-300" />
               </div>
+
+              {/* Advanced Options Toggle */}
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-300 transition-colors"
+              >
+                <svg
+                  className={`w-4 h-4 transition-transform duration-200 ${showAdvanced ? "rotate-90" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                Advanced options
+              </button>
+
+              {/* Advanced Options */}
+              {showAdvanced && (
+                <div className="space-y-4 pt-2">
+                  {/* Description Input */}
+                  <div>
+                    <label className="block text-sm text-zinc-400 mb-2">
+                      Description <span className="text-zinc-600">(optional, for SEO)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. my-product-launch"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      maxLength={50}
+                      className="w-full h-10 px-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-zinc-600 text-sm focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                    />
+                    <p className="mt-1 text-xs text-zinc-600">Will be appended to URL: /abc123/your-description</p>
+                  </div>
+
+                  {/* TTL Select */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-zinc-400">Expires in:</span>
+                    <select
+                      value={ttl === null ? "" : ttl}
+                      onChange={(e) => setTtl(e.target.value === "" ? null : Number(e.target.value))}
+                      className="flex-1 h-10 px-4 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-all duration-300 cursor-pointer"
+                    >
+                      {ttlOptions.map((option) => (
+                        <option key={option.label} value={option.value === null ? "" : option.value} className="bg-zinc-900">
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
 
               {/* Submit button */}
               <button
@@ -212,11 +296,16 @@ export default function Home() {
           history={history}
           onRemove={removeFromHistory}
           onClear={clearHistory}
+          onRefresh={refreshClicks}
         />
 
         {/* Footer */}
-        <div className="mt-auto pt-12 text-zinc-600 text-sm">
-          Built with Next.js & Tailwind CSS
+        <div className="mt-auto pt-12 text-center text-zinc-600 text-sm space-y-2">
+          <p>&copy; {new Date().getFullYear()} Brevity. All rights reserved.</p>
+          <p>Built by Jay Wang</p>
+          <p>
+            Questions? <a href="mailto:kewos554321@gmail.com" className="hover:text-zinc-400 transition-colors">kewos554321@gmail.com</a>
+          </p>
         </div>
       </div>
     </div>

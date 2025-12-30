@@ -3,17 +3,18 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Link {
-  id          String   @id @default(cuid())
-  shortCode   String   @unique
+  id          String    @id @default(cuid())
+  shortCode   String    @unique // @unique already creates index
   originalUrl String
-  createdAt   DateTime @default(now())
-  clicks      Int      @default(0)
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+  clicks      Int       @default(0)
 
-  @@index([shortCode])
+  @@index([expiresAt]) // For cleanup queries
+  @@index([originalUrl]) // For duplicate check (optional)
 }

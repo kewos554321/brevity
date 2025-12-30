@@ -1,11 +1,32 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { generateShortCode, isValidUrl, getBaseUrl } from "@/lib/utils"
+import { rateLimit, getClientIP } from "@/lib/rate-limit"
+
+// Rate limit: 10 requests per minute per IP
+const RATE_LIMIT = { limit: 10, window: 60 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    const ip = getClientIP(request)
+    const { success, remaining, reset } = rateLimit(ip, RATE_LIMIT)
+
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": reset.toString(),
+          },
+        }
+      )
+    }
+
     const body = await request.json()
-    const { url } = body
+    const { url, ttl } = body // ttl in days (null = never expires)
 
     if (!url) {
       return NextResponse.json(
@@ -43,11 +64,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Calculate expiration date
+    const expiresAt = ttl ? new Date(Date.now() + ttl * 24 * 60 * 60 * 1000) : null
+
     // Create the link
     const link = await prisma.link.create({
       data: {
         shortCode,
         originalUrl: url,
+        expiresAt,
       },
     })
 
@@ -57,6 +82,8 @@ export async function POST(request: NextRequest) {
       shortCode: link.shortCode,
       shortUrl,
       originalUrl: link.originalUrl,
+      clicks: link.clicks,
+      expiresAt: link.expiresAt,
     })
   } catch (error) {
     console.error("Error creating short URL:", error)

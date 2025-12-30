@@ -7,6 +7,7 @@ export interface LinkHistoryItem {
   shortCode: string
   shortUrl: string
   originalUrl: string
+  clicks: number
   createdAt: string
 }
 
@@ -41,9 +42,10 @@ export function useLinkHistory() {
     }
   }, [history, isLoaded])
 
-  const addToHistory = useCallback((item: Omit<LinkHistoryItem, "id" | "createdAt">) => {
+  const addToHistory = useCallback((item: Omit<LinkHistoryItem, "id" | "createdAt" | "clicks"> & { clicks?: number }) => {
     const newItem: LinkHistoryItem = {
       ...item,
+      clicks: item.clicks ?? 0,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
     }
@@ -64,11 +66,33 @@ export function useLinkHistory() {
     setHistory([])
   }, [])
 
+  const refreshClicks = useCallback(async () => {
+    if (history.length === 0) return
+
+    const updated = await Promise.all(
+      history.map(async (item) => {
+        try {
+          const res = await fetch(`/api/links/${item.shortCode}`)
+          if (res.ok) {
+            const data = await res.json()
+            return { ...item, clicks: data.clicks }
+          }
+        } catch {
+          // Keep original on error
+        }
+        return item
+      })
+    )
+
+    setHistory(updated)
+  }, [history])
+
   return {
     history,
     isLoaded,
     addToHistory,
     removeFromHistory,
     clearHistory,
+    refreshClicks,
   }
 }
