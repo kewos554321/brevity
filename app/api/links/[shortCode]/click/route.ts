@@ -19,11 +19,24 @@ export async function POST(request: NextRequest, { params }: Props) {
       return NextResponse.json({ error: "Link not found" }, { status: 404 })
     }
 
-    // Increment click count
-    await prisma.link.update({
-      where: { id: link.id },
-      data: { clicks: { increment: 1 } },
-    })
+    // Get referrer and user agent
+    const referrer = request.headers.get("referer") || null
+    const userAgent = request.headers.get("user-agent") || null
+
+    // Increment click count and create click event
+    await prisma.$transaction([
+      prisma.link.update({
+        where: { id: link.id },
+        data: { clicks: { increment: 1 } },
+      }),
+      prisma.click.create({
+        data: {
+          linkId: link.id,
+          referrer,
+          userAgent,
+        },
+      }),
+    ])
 
     return NextResponse.json({ success: true })
   } catch (error) {

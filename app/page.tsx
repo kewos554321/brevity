@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { toast } from "sonner"
 import { QRCodeDisplay } from "@/components/qr-code"
 import { LinkHistory } from "@/components/link-history"
@@ -113,6 +114,20 @@ export default function Home() {
 
       {/* Content */}
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-start pt-20 md:pt-32 px-4 pb-20">
+        {/* Top Navigation */}
+        <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4">
+          <div className="text-lg font-bold text-gradient-brand">Brevity</div>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-all duration-300"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span className="hidden sm:inline">My Dashboard</span>
+          </Link>
+        </nav>
+
         {/* Header */}
         <div className="mb-12 text-center">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-4">
@@ -250,6 +265,7 @@ export default function Home() {
                       </div>
                       <span className="text-sm text-zinc-400 group-hover:text-zinc-300">Show preview before redirect</span>
                     </label>
+
                   </div>
                 </div>
               )}

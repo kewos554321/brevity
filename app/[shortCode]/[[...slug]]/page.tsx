@@ -1,4 +1,5 @@
 import { redirect, notFound } from "next/navigation"
+import { headers } from "next/headers"
 import { prisma } from "@/lib/db"
 import { RedirectClient } from "./redirect-client"
 
@@ -42,11 +43,25 @@ export default async function RedirectPage({ params }: Props) {
     )
   }
 
-  // Increment click count
-  await prisma.link.update({
-    where: { id: link.id },
-    data: { clicks: { increment: 1 } },
-  })
+  // Get request headers for analytics
+  const headersList = await headers()
+  const referrer = headersList.get("referer") || null
+  const userAgent = headersList.get("user-agent") || null
+
+  // Increment click count and create click event
+  await prisma.$transaction([
+    prisma.link.update({
+      where: { id: link.id },
+      data: { clicks: { increment: 1 } },
+    }),
+    prisma.click.create({
+      data: {
+        linkId: link.id,
+        referrer,
+        userAgent,
+      },
+    }),
+  ])
 
   redirect(link.originalUrl)
 }
