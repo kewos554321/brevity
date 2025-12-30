@@ -79,7 +79,7 @@ export default async function Image() {
               marginTop: 20,
             }}
           >
-            Shorten your URLs with elegance
+            Free URL Shortener with Analytics
           </div>
 
           {/* Features */}
@@ -92,11 +92,11 @@ export default async function Image() {
               color: "#71717a",
             }}
           >
-            <span>Simple</span>
+            <span>Click Tracking</span>
             <span style={{ color: "#3f3f46" }}>•</span>
-            <span>Fast</span>
+            <span>Password Protection</span>
             <span style={{ color: "#3f3f46" }}>•</span>
-            <span>Beautiful</span>
+            <span>Free</span>
           </div>
         </div>
       </div>
