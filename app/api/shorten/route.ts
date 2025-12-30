@@ -42,6 +42,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Prevent shortening our own URLs (avoid redirect loops)
+    const baseUrl = getBaseUrl()
+    const urlObj = new URL(url)
+    const baseUrlObj = new URL(baseUrl)
+    if (urlObj.hostname === baseUrlObj.hostname) {
+      return NextResponse.json(
+        { error: "Cannot shorten Brevity URLs" },
+        { status: 400 }
+      )
+    }
+
     // Generate unique short code
     let shortCode = generateShortCode()
     let attempts = 0
