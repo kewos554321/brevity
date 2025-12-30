@@ -19,9 +19,11 @@ export async function POST(request: NextRequest, { params }: Props) {
       return NextResponse.json({ error: "Link not found" }, { status: 404 })
     }
 
-    // Get referrer and user agent
+    // Get referrer, user agent, and country
     const referrer = request.headers.get("referer") || null
     const userAgent = request.headers.get("user-agent") || null
+    // Vercel provides geo headers
+    const country = request.headers.get("x-vercel-ip-country") || null
 
     // Increment click count and create click event
     await prisma.$transaction([
@@ -34,6 +36,7 @@ export async function POST(request: NextRequest, { params }: Props) {
           linkId: link.id,
           referrer,
           userAgent,
+          country,
         },
       }),
     ])

@@ -47,6 +47,8 @@ export default async function RedirectPage({ params }: Props) {
   const headersList = await headers()
   const referrer = headersList.get("referer") || null
   const userAgent = headersList.get("user-agent") || null
+  // Vercel provides geo headers
+  const country = headersList.get("x-vercel-ip-country") || null
 
   // Increment click count and create click event
   await prisma.$transaction([
@@ -59,6 +61,7 @@ export default async function RedirectPage({ params }: Props) {
         linkId: link.id,
         referrer,
         userAgent,
+        country,
       },
     }),
   ])

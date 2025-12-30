@@ -31,12 +31,16 @@ interface PersonalStats {
   totalLinks: number
   totalClicks: number
   clickTrend: { date: string; clicks: number }[]
-  topReferrers: { source: string; count: number }[]
+  platforms: { platform: string; count: number }[]
   devices: { desktop: number; mobile: number; tablet: number; other: number }
+  browsers: { browser: string; count: number }[]
+  operatingSystems: { os: string; count: number }[]
+  countries: { country: string; count: number }[]
+  clicksByHour: { hour: number; clicks: number }[]
   topLinks: { shortCode: string; clicks: number; createdAt: string }[]
 }
 
-const COLORS = ["#3b82f6", "#06b6d4", "#10b981", "#f59e0b"]
+const COLORS = ["#3b82f6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]
 
 export default function DashboardPage() {
   const { history, isLoaded, refreshClicks, removeFromHistory, clearHistory } = useLinkHistory()
@@ -80,7 +84,6 @@ export default function DashboardPage() {
   const handleRefresh = async () => {
     setIsRefreshing(true)
     await refreshClicks()
-    // Re-fetch stats
     if (history.length > 0) {
       try {
         const shortCodes = history.map((item) => item.shortCode)
@@ -122,6 +125,12 @@ export default function DashboardPage() {
       month: "short",
       day: "numeric",
     })
+  }
+
+  const formatHour = (hour: number) => {
+    if (hour === 0) return "12AM"
+    if (hour === 12) return "12PM"
+    return hour < 12 ? `${hour}AM` : `${hour - 12}PM`
   }
 
   const truncateUrl = (url: string, maxLength = 40) => {
@@ -184,7 +193,6 @@ export default function DashboardPage() {
         </header>
 
         {history.length === 0 ? (
-          /* Empty State */
           <div className="max-w-6xl mx-auto w-full flex-1 flex items-center justify-center">
             <div className="text-center">
               <svg className="w-24 h-24 text-zinc-700 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,8 +276,8 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Charts Grid */}
-            <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Charts Grid - Row 1 */}
+            <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Click Trend Chart */}
               <div className="glass rounded-2xl p-6">
                 <h2 className="text-lg font-semibold text-white mb-4">Click Trend (7 Days)</h2>
@@ -277,7 +285,7 @@ export default function DashboardPage() {
                   <div className="h-48 flex items-center justify-center">
                     <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
                   </div>
-                ) : stats && stats.clickTrend.length > 0 ? (
+                ) : stats && stats.clickTrend.some(d => d.clicks > 0) ? (
                   <div className="h-48">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stats.clickTrend}>
@@ -291,11 +299,7 @@ export default function DashboardPage() {
                         <XAxis dataKey="date" tickFormatter={formatDate} stroke="#71717a" fontSize={11} />
                         <YAxis stroke="#71717a" fontSize={11} />
                         <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#18181b",
-                            border: "1px solid rgba(255,255,255,0.1)",
-                            borderRadius: "8px",
-                          }}
+                          contentStyle={{ backgroundColor: "#18181b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}
                           labelFormatter={formatDate}
                           labelStyle={{ color: "#fff" }}
                         />
@@ -304,15 +308,44 @@ export default function DashboardPage() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-48 flex items-center justify-center text-zinc-500">
-                    No click data yet
-                  </div>
+                  <div className="h-48 flex items-center justify-center text-zinc-500">No click data yet</div>
                 )}
               </div>
 
+              {/* Click by Hour */}
+              <div className="glass rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Clicks by Hour</h2>
+                {isLoadingStats ? (
+                  <div className="h-48 flex items-center justify-center">
+                    <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
+                  </div>
+                ) : stats && stats.clicksByHour.some(d => d.clicks > 0) ? (
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={stats.clicksByHour}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                        <XAxis dataKey="hour" tickFormatter={formatHour} stroke="#71717a" fontSize={10} interval={3} />
+                        <YAxis stroke="#71717a" fontSize={11} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: "#18181b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}
+                          labelFormatter={(h) => formatHour(h as number)}
+                          labelStyle={{ color: "#fff" }}
+                        />
+                        <Bar dataKey="clicks" fill="#8b5cf6" radius={[2, 2, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-48 flex items-center justify-center text-zinc-500">No click data yet</div>
+                )}
+              </div>
+            </div>
+
+            {/* Charts Grid - Row 2 */}
+            <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               {/* Device Distribution */}
               <div className="glass rounded-2xl p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Device Distribution</h2>
+                <h2 className="text-lg font-semibold text-white mb-4">Devices</h2>
                 {isLoadingStats ? (
                   <div className="h-48 flex items-center justify-center">
                     <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
@@ -321,26 +354,12 @@ export default function DashboardPage() {
                   <div className="h-48 flex items-center">
                     <ResponsiveContainer width="50%" height="100%">
                       <PieChart>
-                        <Pie
-                          data={deviceData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={40}
-                          outerRadius={70}
-                          paddingAngle={2}
-                          dataKey="value"
-                        >
+                        <Pie data={deviceData} cx="50%" cy="50%" innerRadius={35} outerRadius={60} paddingAngle={2} dataKey="value">
                           {deviceData.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#18181b",
-                            border: "1px solid rgba(255,255,255,0.1)",
-                            borderRadius: "8px",
-                          }}
-                        />
+                        <Tooltip contentStyle={{ backgroundColor: "#18181b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }} itemStyle={{ color: "#fff" }} />
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="flex-1 space-y-2">
@@ -354,70 +373,130 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="h-48 flex items-center justify-center text-zinc-500">
-                    No device data yet
-                  </div>
+                  <div className="h-48 flex items-center justify-center text-zinc-500">No device data yet</div>
                 )}
               </div>
 
-              {/* Top Referrers */}
+              {/* Platforms */}
               <div className="glass rounded-2xl p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Top Referrers</h2>
+                <h2 className="text-lg font-semibold text-white mb-4">Platforms</h2>
                 {isLoadingStats ? (
                   <div className="h-48 flex items-center justify-center">
                     <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
                   </div>
-                ) : stats && stats.topReferrers.length > 0 ? (
-                  <div className="h-48">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stats.topReferrers} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                        <XAxis type="number" stroke="#71717a" fontSize={11} />
-                        <YAxis dataKey="source" type="category" stroke="#71717a" fontSize={11} width={80} />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#18181b",
-                            border: "1px solid rgba(255,255,255,0.1)",
-                            borderRadius: "8px",
-                          }}
-                        />
-                        <Bar dataKey="count" fill="#06b6d4" radius={[0, 4, 4, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="h-48 flex items-center justify-center text-zinc-500">
-                    No referrer data yet
-                  </div>
-                )}
-              </div>
-
-              {/* Top Links */}
-              <div className="glass rounded-2xl p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Top Performing Links</h2>
-                {isLoadingStats ? (
-                  <div className="h-48 flex items-center justify-center">
-                    <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
-                  </div>
-                ) : stats && stats.topLinks.length > 0 ? (
+                ) : stats && stats.platforms.length > 0 ? (
                   <div className="h-48 overflow-y-auto space-y-2">
-                    {stats.topLinks.map((link, index) => (
-                      <div key={link.shortCode} className="flex items-center gap-3 p-2 rounded-lg bg-white/5">
-                        <span className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">
-                          {index + 1}
-                        </span>
-                        <span className="text-blue-400 font-mono text-sm">{link.shortCode}</span>
-                        <span className="ml-auto text-cyan-400 font-semibold">{link.clicks}</span>
-                        <span className="text-zinc-500 text-xs">clicks</span>
+                    {stats.platforms.map((item, index) => (
+                      <div key={item.platform} className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                        <span className="text-zinc-300 text-sm flex-1 truncate">{item.platform}</span>
+                        <span className="text-white text-sm font-medium">{item.count}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="h-48 flex items-center justify-center text-zinc-500">
-                    No links yet
-                  </div>
+                  <div className="h-48 flex items-center justify-center text-zinc-500">No platform data yet</div>
                 )}
               </div>
+
+              {/* Countries */}
+              <div className="glass rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Countries</h2>
+                {isLoadingStats ? (
+                  <div className="h-48 flex items-center justify-center">
+                    <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
+                  </div>
+                ) : stats && stats.countries.length > 0 ? (
+                  <div className="h-48 overflow-y-auto space-y-2">
+                    {stats.countries.map((item, index) => (
+                      <div key={item.country} className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                        <span className="text-zinc-300 text-sm flex-1 truncate">{item.country}</span>
+                        <span className="text-white text-sm font-medium">{item.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-48 flex items-center justify-center text-zinc-500">No country data yet</div>
+                )}
+              </div>
+            </div>
+
+            {/* Charts Grid - Row 3: Browsers & OS */}
+            <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* Browsers */}
+              <div className="glass rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Browsers</h2>
+                {isLoadingStats ? (
+                  <div className="h-48 flex items-center justify-center">
+                    <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
+                  </div>
+                ) : stats && stats.browsers.length > 0 ? (
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={stats.browsers}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                        <XAxis dataKey="browser" stroke="#71717a" fontSize={10} />
+                        <YAxis stroke="#71717a" fontSize={11} />
+                        <Tooltip contentStyle={{ backgroundColor: "#18181b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }} itemStyle={{ color: "#fff" }} />
+                        <Bar dataKey="count" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-48 flex items-center justify-center text-zinc-500">No browser data yet</div>
+                )}
+              </div>
+
+              {/* Operating Systems */}
+              <div className="glass rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Operating Systems</h2>
+                {isLoadingStats ? (
+                  <div className="h-48 flex items-center justify-center">
+                    <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
+                  </div>
+                ) : stats && stats.operatingSystems.length > 0 ? (
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={stats.operatingSystems}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                        <XAxis dataKey="os" stroke="#71717a" fontSize={10} />
+                        <YAxis stroke="#71717a" fontSize={11} />
+                        <Tooltip contentStyle={{ backgroundColor: "#18181b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }} itemStyle={{ color: "#fff" }} />
+                        <Bar dataKey="count" fill="#10b981" radius={[2, 2, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-48 flex items-center justify-center text-zinc-500">No OS data yet</div>
+                )}
+              </div>
+            </div>
+
+            {/* Top Links */}
+            <div className="max-w-6xl mx-auto w-full glass rounded-2xl p-6 mb-6">
+              <h2 className="text-lg font-semibold text-white mb-4">Top Performing Links</h2>
+              {isLoadingStats ? (
+                <div className="h-24 flex items-center justify-center">
+                  <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
+                </div>
+              ) : stats && stats.topLinks.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                  {stats.topLinks.map((link, index) => (
+                    <div key={link.shortCode} className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+                      <span className="w-7 h-7 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-blue-400 font-mono text-sm truncate">{link.shortCode}</p>
+                        <p className="text-cyan-400 text-xs font-medium">{link.clicks} clicks</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-24 flex items-center justify-center text-zinc-500">No links yet</div>
+              )}
             </div>
 
             {/* Links Table */}
@@ -425,10 +504,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-white">All Links</h2>
                 {history.length > 0 && (
-                  <button
-                    onClick={clearHistory}
-                    className="text-sm text-zinc-500 hover:text-red-400 transition-colors"
-                  >
+                  <button onClick={clearHistory} className="text-sm text-zinc-500 hover:text-red-400 transition-colors">
                     Clear all
                   </button>
                 )}
@@ -449,19 +525,12 @@ export default function DashboardPage() {
                     {history.map((item) => (
                       <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                         <td className="py-4 px-4">
-                          <a
-                            href={item.shortUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 font-mono text-sm"
-                          >
+                          <a href={item.shortUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 font-mono text-sm">
                             {item.shortCode}
                           </a>
                         </td>
                         <td className="py-4 px-4 hidden md:table-cell">
-                          <span className="text-zinc-400 text-sm" title={item.originalUrl}>
-                            {truncateUrl(item.originalUrl)}
-                          </span>
+                          <span className="text-zinc-400 text-sm" title={item.originalUrl}>{truncateUrl(item.originalUrl)}</span>
                         </td>
                         <td className="py-4 px-4 text-center">
                           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-sm font-medium">
@@ -473,24 +542,14 @@ export default function DashboardPage() {
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex items-center justify-end gap-1">
-                            {/* Copy */}
-                            <button
-                              onClick={() => handleCopy(item.shortUrl)}
-                              className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                              title="Copy"
-                            >
+                            <button onClick={() => handleCopy(item.shortUrl)} className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Copy">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                               </svg>
                             </button>
-
-                            {/* QR Code */}
                             <Dialog>
                               <DialogTrigger asChild>
-                                <button
-                                  className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                                  title="QR Code"
-                                >
+                                <button className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="QR Code">
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                                   </svg>
@@ -502,32 +561,16 @@ export default function DashboardPage() {
                                 </DialogHeader>
                                 <div className="flex flex-col items-center py-4">
                                   <QRCodeDisplay url={item.shortUrl} />
-                                  <p className="mt-4 text-sm text-zinc-400 text-center break-all px-4">
-                                    {item.shortUrl}
-                                  </p>
+                                  <p className="mt-4 text-sm text-zinc-400 text-center break-all px-4">{item.shortUrl}</p>
                                 </div>
                               </DialogContent>
                             </Dialog>
-
-                            {/* Open link */}
-                            <a
-                              href={item.shortUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                              title="Open"
-                            >
+                            <a href={item.shortUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Open">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                               </svg>
                             </a>
-
-                            {/* Delete */}
-                            <button
-                              onClick={() => removeFromHistory(item.id)}
-                              className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Delete"
-                            >
+                            <button onClick={() => removeFromHistory(item.id)} className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
