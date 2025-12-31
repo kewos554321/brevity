@@ -66,31 +66,48 @@ export const metadata: Metadata = {
   },
 };
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://brevity.vercel.app";
+
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  name: "Brevity",
-  description: "Free URL shortener with click analytics, password protection, and one-time links. Shorten URLs instantly, track clicks in real-time, and keep your links secure.",
-  url: process.env.NEXT_PUBLIC_BASE_URL || "https://brevity.vercel.app",
-  applicationCategory: "UtilityApplication",
-  operatingSystem: "Any",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-  },
-  author: {
-    "@type": "Person",
-    name: "Jay Wang",
-  },
-  featureList: [
-    "Free URL shortening",
-    "Click analytics and tracking",
-    "Password protected links",
-    "One-time self-destructing links",
-    "QR code generation",
-    "Custom link expiration",
-    "No signup required",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      name: "Brevity",
+      description: "Free URL shortener with click analytics, password protection, and one-time links. Shorten URLs instantly, track clicks in real-time, and keep your links secure.",
+      url: baseUrl,
+      applicationCategory: "UtilityApplication",
+      operatingSystem: "Any",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+      author: {
+        "@type": "Person",
+        name: "Jay Wang",
+      },
+      featureList: [
+        "Free URL shortening",
+        "Click analytics and tracking",
+        "Password protected links",
+        "One-time self-destructing links",
+        "QR code generation",
+        "Custom link expiration",
+        "No signup required",
+      ],
+    },
+    {
+      "@type": "Organization",
+      name: "Brevity",
+      url: baseUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${baseUrl}/icon.svg`,
+        width: 512,
+        height: 512,
+      },
+    },
   ],
 };
 
