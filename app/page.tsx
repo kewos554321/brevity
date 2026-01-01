@@ -116,7 +116,7 @@ export default function Home() {
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-start pt-20 md:pt-32 px-4 pb-20">
         {/* Top Navigation */}
         <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4">
-          <div className="text-lg font-bold text-gradient-brand">Brevity</div>
+          <div className="text-lg font-bold text-gradient-brand">Urlitrim</div>
           <Link
             href="/dashboard"
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-all duration-300"
@@ -131,7 +131,7 @@ export default function Home() {
         {/* Header */}
         <div className="mb-12 text-center">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-4">
-            <span className="text-gradient-brand">Brevity</span>
+            <span className="text-gradient-brand">Urlitrim</span>
           </h1>
           <p className="text-zinc-400 text-lg md:text-xl max-w-md mx-auto">
             Shorten your URLs with elegance.
@@ -376,7 +376,7 @@ export default function Home() {
 
         {/* Footer */}
         <div className="mt-auto pt-12 text-center text-zinc-600 text-sm space-y-2">
-          <p>&copy; {new Date().getFullYear()} Brevity. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Urlitrim. All rights reserved.</p>
           <p>Built by Jay Wang</p>
           <p>
             Questions? <a href="mailto:kewos554321@gmail.com" className="hover:text-zinc-400 transition-colors">kewos554321@gmail.com</a>

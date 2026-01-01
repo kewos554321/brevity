@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "https://brevity.vercel.app";
+    process.env.NEXT_PUBLIC_BASE_URL || "https://urlitrim.vercel.app";
 
   // 取得所有公開的短網址（排除已過期、有密碼保護、一次性連結）
   const links = await prisma.link.findMany({

@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     const baseUrlObj = new URL(baseUrl)
     if (urlObj.hostname === baseUrlObj.hostname) {
       return NextResponse.json(
-        { error: "Cannot shorten Brevity URLs" },
+        { error: "Cannot shorten Urlitrim URLs" },
         { status: 400 }
       )
     }

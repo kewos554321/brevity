@@ -11,7 +11,7 @@ export interface LinkHistoryItem {
   createdAt: string
 }
 
-const STORAGE_KEY = "brevity_link_history"
+const STORAGE_KEY = "urlitrim_link_history"
 const MAX_HISTORY_ITEMS = 10
 
 export function useLinkHistory() {

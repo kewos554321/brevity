@@ -2,8 +2,8 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Brevity - URL Shortener",
-    short_name: "Brevity",
+    name: "Urlitrim - URL Shortener",
+    short_name: "Urlitrim",
     description: "Simple and fast URL shortening service",
     start_url: "/",
     display: "standalone",

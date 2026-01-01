@@ -180,7 +180,7 @@ describe("POST /api/shorten", () => {
     const data = await response.json()
 
     expect(response.status).toBe(400)
-    expect(data.error).toBe("Cannot shorten Brevity URLs")
+    expect(data.error).toBe("Cannot shorten Urlitrim URLs")
   })
 
   it("should create link with password", async () => {

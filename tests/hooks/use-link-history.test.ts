@@ -174,7 +174,7 @@ describe("useLinkHistory", () => {
     })
 
     expect(localStorage.setItem).toHaveBeenCalledWith(
-      "brevity_link_history",
+      "urlitrim_link_history",
       expect.any(String)
     )
   })

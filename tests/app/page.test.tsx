@@ -87,7 +87,7 @@ describe("Home Page", () => {
 
   it("should render the page title", () => {
     render(<Home />)
-    expect(screen.getByText("Brevity")).toBeInTheDocument()
+    expect(screen.getByText("Urlitrim")).toBeInTheDocument()
   })
 
   it("should render the subtitle", () => {

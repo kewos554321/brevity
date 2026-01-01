@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://brevity.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://urlitrim.vercel.app"),
   title: {
-    default: "Brevity - Free URL Shortener with Analytics & Password Protection",
-    template: "%s | Brevity",
+    default: "Urlitrim - Free URL Shortener with Analytics & Password Protection",
+    template: "%s | Urlitrim",
   },
   description: "Free URL shortener with click analytics, password protection, and one-time links. Shorten URLs instantly, track clicks in real-time, and keep your links secure. No signup required.",
   keywords: [
@@ -41,13 +41,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    siteName: "Brevity",
-    title: "Brevity - Free URL Shortener with Analytics & Password Protection",
+    siteName: "Urlitrim",
+    title: "Urlitrim - Free URL Shortener with Analytics & Password Protection",
     description: "Free URL shortener with click analytics, password protection, and one-time links. Shorten URLs instantly, track clicks in real-time, and keep your links secure.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Brevity - Free URL Shortener with Analytics",
+    title: "Urlitrim - Free URL Shortener with Analytics",
     description: "Free URL shortener with click analytics, password protection, and one-time links. Shorten URLs instantly and track clicks in real-time.",
   },
   robots: {
@@ -66,14 +66,14 @@ export const metadata: Metadata = {
   },
 };
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://brevity.vercel.app";
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://urlitrim.vercel.app";
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "WebApplication",
-      name: "Brevity",
+      name: "Urlitrim",
       description: "Free URL shortener with click analytics, password protection, and one-time links. Shorten URLs instantly, track clicks in real-time, and keep your links secure.",
       url: baseUrl,
       applicationCategory: "UtilityApplication",
@@ -99,7 +99,7 @@ const jsonLd = {
     },
     {
       "@type": "Organization",
-      name: "Brevity",
+      name: "Urlitrim",
       url: baseUrl,
       logo: {
         "@type": "ImageObject",

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Brevity is a URL shortening service built with Next.js. It allows users to create shortened URLs, track click analytics, and manage their links.
+Urlitrim is a URL shortening service built with Next.js. It allows users to create shortened URLs, track click analytics, and manage their links.
 
 ## Tech Stack
 
