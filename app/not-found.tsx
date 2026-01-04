@@ -1,6 +1,16 @@
-"use client"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { GoBackButton } from "@/components/go-back-button";
 
-import Link from "next/link"
+export const metadata: Metadata = {
+  title: "404 - Link Not Found",
+  description:
+    "The requested link could not be found. It may have expired, been deleted, or never existed. Create a new short URL instead.",
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export default function NotFound() {
   return (
@@ -42,12 +52,7 @@ export default function NotFound() {
               >
                 Create New Link
               </Link>
-              <button
-                onClick={() => window.history.back()}
-                className="w-full h-12 rounded-xl font-medium text-zinc-400 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300"
-              >
-                Go Back
-              </button>
+              <GoBackButton />
             </div>
           </div>
 
@@ -58,5 +63,5 @@ export default function NotFound() {
         </div>
       </div>
     </div>
-  )
+  );
 }

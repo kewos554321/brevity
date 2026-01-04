@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation"
 import { headers } from "next/headers"
+import type { Metadata } from "next"
 import { prisma } from "@/lib/db"
 import { RedirectClient } from "./redirect-client"
 
@@ -7,6 +8,47 @@ export const dynamic = "force-dynamic"
 
 interface Props {
   params: Promise<{ shortCode: string; slug?: string[] }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { shortCode, slug } = await params
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://urlitrim.vercel.app"
+
+  const link = await prisma.link.findUnique({
+    where: { shortCode },
+    select: { originalUrl: true, showPreview: true },
+  })
+
+  if (!link) {
+    return {
+      title: "Link Not Found",
+      robots: { index: false },
+    }
+  }
+
+  const slugText = slug?.join("/") || ""
+  const displayTitle = slugText ? slugText.replace(/-/g, " ") : "Shortened Link"
+  const truncatedUrl = link.originalUrl.substring(0, 100) + (link.originalUrl.length > 100 ? "..." : "")
+
+  return {
+    title: displayTitle,
+    description: `Redirecting to: ${truncatedUrl}`,
+    openGraph: {
+      title: `${displayTitle} | Urlitrim`,
+      description: `Shortened link redirecting to: ${truncatedUrl}`,
+      url: `${baseUrl}/${shortCode}${slugText ? `/${slugText}` : ""}`,
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: `${displayTitle} | Urlitrim`,
+      description: `Shortened link redirecting to: ${truncatedUrl}`,
+    },
+    robots: {
+      index: link.showPreview ? true : false,
+      follow: true,
+    },
+  }
 }
 
 export default async function RedirectPage({ params }: Props) {
