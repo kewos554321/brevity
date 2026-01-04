@@ -297,5 +297,55 @@ describe("useLinkHistory", () => {
       // Should keep original clicks on exception
       expect(result.current.history[0].clicks).toBe(3)
     })
+
+    it("should call refreshClicks and update history", async () => {
+      const storedHistory = [
+        {
+          id: "1",
+          shortCode: "xyz789",
+          shortUrl: "http://localhost:3000/xyz789",
+          originalUrl: "https://test.com",
+          clicks: 10,
+          createdAt: "2024-01-01T00:00:00.000Z",
+        },
+        {
+          id: "2",
+          shortCode: "def456",
+          shortUrl: "http://localhost:3000/def456",
+          originalUrl: "https://test2.com",
+          clicks: 20,
+          createdAt: "2024-01-02T00:00:00.000Z",
+        },
+      ]
+      ;(localStorage.getItem as ReturnType<typeof vi.fn>).mockReturnValue(
+        JSON.stringify(storedHistory)
+      )
+      // Mock for auto-refresh on initial load (2 items)
+      // Then mock for explicit refreshClicks call (2 items)
+      ;(global.fetch as ReturnType<typeof vi.fn>)
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ clicks: 50 }) })
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ clicks: 60 }) })
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ clicks: 100 }) })
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ clicks: 200 }) })
+
+      const { result } = renderHook(() => useLinkHistory())
+
+      // Wait for initial load and auto-refresh
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 100))
+      })
+
+      // Should have auto-refreshed values
+      expect(result.current.history[0].clicks).toBe(50)
+      expect(result.current.history[1].clicks).toBe(60)
+
+      // Explicitly call refreshClicks again
+      await act(async () => {
+        await result.current.refreshClicks()
+      })
+
+      expect(result.current.history[0].clicks).toBe(100)
+      expect(result.current.history[1].clicks).toBe(200)
+    })
   })
 })

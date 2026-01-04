@@ -9,6 +9,10 @@ vi.mock("@/lib/db", () => ({
       findUnique: vi.fn(),
       update: vi.fn(),
     },
+    click: {
+      create: vi.fn(),
+    },
+    $transaction: vi.fn(),
   },
 }))
 
@@ -39,11 +43,10 @@ describe("POST /api/links/[shortCode]/click", () => {
       shortCode: "abc123",
       clicks: 5,
     })
-    ;(prisma.link.update as ReturnType<typeof vi.fn>).mockResolvedValue({
-      id: "1",
-      shortCode: "abc123",
-      clicks: 6,
-    })
+    ;(prisma.$transaction as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { id: "1", shortCode: "abc123", clicks: 6 },
+      { id: "click-1", linkId: "1" },
+    ])
 
     const request = new NextRequest("http://localhost:3000/api/links/abc123/click", {
       method: "POST",
@@ -54,10 +57,7 @@ describe("POST /api/links/[shortCode]/click", () => {
 
     expect(response.status).toBe(200)
     expect(data.success).toBe(true)
-    expect(prisma.link.update).toHaveBeenCalledWith({
-      where: { id: "1" },
-      data: { clicks: { increment: 1 } },
-    })
+    expect(prisma.$transaction).toHaveBeenCalled()
   })
 
   it("should return 500 on database error", async () => {

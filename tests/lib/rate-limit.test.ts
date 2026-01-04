@@ -75,6 +75,36 @@ describe("rateLimit", () => {
   })
 })
 
+describe("cleanup interval", () => {
+  it("should clean up expired entries after 5 minutes", async () => {
+    // Use fake timers
+    vi.useFakeTimers()
+
+    // Dynamically import to get fresh module with fake timers
+    vi.resetModules()
+    const { rateLimit: freshRateLimit } = await import("@/lib/rate-limit")
+
+    const identifier = "cleanup-interval-test-ip"
+    const config = { limit: 2, window: 1 } // 1 second window
+
+    // Create an entry
+    freshRateLimit(identifier, config)
+
+    // Advance time past the window (entry expires)
+    vi.advanceTimersByTime(2000)
+
+    // Advance time to trigger cleanup interval (5 minutes)
+    vi.advanceTimersByTime(5 * 60 * 1000)
+
+    // The entry should be cleaned up, so next request should get fresh limit
+    const result = freshRateLimit(identifier, config)
+    expect(result.success).toBe(true)
+    expect(result.remaining).toBe(1)
+
+    vi.useRealTimers()
+  })
+})
+
 describe("getClientIP", () => {
   it("should return x-forwarded-for header if present", () => {
     const request = new Request("http://localhost:3000", {

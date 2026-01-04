@@ -22,7 +22,6 @@ export default function Home() {
   const [oneTime, setOneTime] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [shortUrl, setShortUrl] = useState("")
-  const [shortCode, setShortCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -70,7 +69,6 @@ export default function Home() {
       const finalUrl = data.shortUrl + slug
 
       setShortUrl(finalUrl)
-      setShortCode(data.shortCode)
       setDescription("")
       setPassword("")
       setOneTime(false)

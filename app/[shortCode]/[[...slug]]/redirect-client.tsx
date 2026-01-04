@@ -1,6 +1,5 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { LinkGate } from "@/components/link-gate"
 
 interface RedirectClientProps {
@@ -11,7 +10,6 @@ interface RedirectClientProps {
 }
 
 export function RedirectClient({ shortCode, originalUrl, hasPassword, showPreview }: RedirectClientProps) {
-  const router = useRouter()
 
   const handleSuccess = async () => {
     // Increment click count via API

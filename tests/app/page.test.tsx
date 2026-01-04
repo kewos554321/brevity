@@ -67,7 +67,6 @@ vi.mock("@/components/ui/dialog", () => ({
   ),
   DialogTrigger: ({
     children,
-    asChild,
   }: {
     children: React.ReactNode
     asChild?: boolean
@@ -87,7 +86,9 @@ describe("Home Page", () => {
 
   it("should render the page title", () => {
     render(<Home />)
-    expect(screen.getByText("Urlitrim")).toBeInTheDocument()
+    // There are multiple "Urlitrim" elements (nav logo and header), so use getAllByText
+    const urlitrimElements = screen.getAllByText("Urlitrim")
+    expect(urlitrimElements.length).toBeGreaterThanOrEqual(1)
   })
 
   it("should render the subtitle", () => {
